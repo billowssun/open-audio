@@ -31,10 +31,12 @@ import { saveAs } from "file-saver"; // You will need to install file-saver: npm
 
 export default function Home() {
   const [apiKeyInput, setApiKey] = useState("");
+  const [baseUrlInput, setBaseUrl] = useState("");
 
   const [model, setModel] = useState("tts-1");
   const [inputText, setInputText] = useState("");
   const [voice, setVoice] = useState("alloy");
+  const [customVoice, setCustomVoice] = useState("");
   const [speed, setSpeed] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sliderValue, setSliderValue] = useState(1);
@@ -77,12 +79,14 @@ export default function Home() {
       const body = JSON.stringify({
         model: model,
         input: inputText,
-        voice: voice,
+        voice: voice === "custom" ? customVoice : voice,
         speed: speed.toFixed(1),
       });
 
+      const apiUrl = baseUrlInput.trim() ? baseUrlInput.trim().replace(/\/$/, '') : "https://api.openai.com/v1";
+
       // Make the fetch request to the OpenAI API
-      const response = await fetch("https://api.openai.com/v1/audio/speech", {
+      const response = await fetch(`${apiUrl}/audio/speech`, {
         method: "POST",
         headers: headers,
         body: body,
@@ -177,6 +181,19 @@ export default function Home() {
                   </a>
                 </Text>
               </Box>
+              <FormControl>
+                <FormLabel htmlFor="base-url">Base URL (Optional)</FormLabel>
+                <Input
+                  id="base-url"
+                  placeholder="https://api.openai.com/v1"
+                  type="url"
+                  value={baseUrlInput}
+                  onChange={(e) => setBaseUrl(e.target.value)}
+                  variant="outline"
+                  borderColor="black"
+                />
+              </FormControl>
+
               <Grid
                 templateColumns={{ md: "4fr 1fr" }} // 80-20 ratio
                 gap={4}
@@ -238,20 +255,32 @@ export default function Home() {
                     value={voice}
                     onChange={(e) => setVoice(e.target.value)}
                     variant="outline"
-                    placeholder="Select voice"
                     borderColor="black"
                     focusBorderColor="black"
                     colorScheme="blackAlpha"
-                    _hover={{ borderColor: "gray.400" }} // Optional: style for hover state
+                    _hover={{ borderColor: "gray.400" }}
                   >
-                    {/* List of supported voices */}
                     <option value="alloy">Alloy</option>
+                    <option value="ash">Ash</option>
+                    <option value="coral">Coral</option>
                     <option value="echo">Echo</option>
                     <option value="fable">Fable</option>
-                    <option value="onyx">Onyx</option>
                     <option value="nova">Nova</option>
+                    <option value="onyx">Onyx</option>
+                    <option value="sage">Sage</option>
                     <option value="shimmer">Shimmer</option>
+                    <option value="custom">Custom...</option>
                   </Select>
+                  {voice === "custom" && (
+                    <Input
+                      mt={2}
+                      placeholder="Enter custom voice name"
+                      value={customVoice}
+                      onChange={(e) => setCustomVoice(e.target.value)}
+                      borderColor="black"
+                      isRequired
+                    />
+                  )}
                 </FormControl>
 
                 <FormControl width="40%" mt="-15">
@@ -262,7 +291,10 @@ export default function Home() {
                     min={0.25}
                     max={4}
                     step={0.25}
-                    onChange={(v) => setSliderValue(v)}
+                    onChange={(v) => {
+                      setSliderValue(v);
+                      setSpeed(v);
+                    }}
                     onMouseEnter={() => setShowTooltip(true)}
                     onMouseLeave={() => setShowTooltip(false)}
                     ref={sliderRef}
