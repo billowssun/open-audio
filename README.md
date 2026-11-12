@@ -1,3 +1,9 @@
+<!-- project-overview:start -->
+> **项目简介**：基于 Next.js 和 OpenAI TTS 的文本转语音网页，支持音色、语速配置及音频下载。
+>
+> 本仓库是 [Justmalhar/open-audio](https://github.com/Justmalhar/open-audio) 的 Fork；下方保留项目文档与原有署名。
+<!-- project-overview:end -->
+
 ![Open-Audio TTS OG Image](public/og-image.png)
 
 ## Update
